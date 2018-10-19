@@ -91,14 +91,9 @@ function getNewToken(oAuth2Client, callback) {
            "content-type": "application/json"
          }
        };
-       const obj = {
-         name: '',
-         emails: [  ],
-         phones: [  ]
-       };
        rows.map((row, index) => {
-         console.log(row)
-         if(index >= 1){
+         //console.log(row)
+         if(index > 0){
            let req = http.request(options, function (res) {
              let chunks = [];
 
@@ -110,11 +105,22 @@ function getNewToken(oAuth2Client, callback) {
                let body = Buffer.concat(chunks);
              })
            });
-           row[0] ? obj.name = row[0] + row[1] : ''
-           row[5] ? obj.phones.push({type: 'work', phone: row[5] }) : ''
-           row[4] ? obj.phones.push({type: 'home', phone: row[4] }) : ''
-           row[2] ? obj.emails.push({type: 'work', email: row[2] }) : ''
-           req.write(JSON.stringify(obj))
+           let firstName = row[0] ? row[0] : "";
+           let lastName = row[1] ? row[1] : "";
+           let thisName = firstName + " " + lastName;
+           let thisEmail = row[2] ? row[2] : "";
+           let thisHomePhone = row[4] ? row[4] : "";
+           let thisWorkPhone = row[5] ? row[5] : "";
+
+           let obj = {
+             "name": `${thisName}`,
+             "emails": [{"type":"home", "email":`${thisEmail}`}],
+             "phones": [{
+               "type":"work", "phone":`${thisWorkPhone}`,
+               "type":"home", "phone":`${thisHomePhone}`
+             }]
+           }
+           req.write(JSON.stringify(obj));
            req.end();
          }
        })
